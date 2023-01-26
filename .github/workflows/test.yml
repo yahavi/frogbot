@@ -76,7 +76,6 @@ jobs:
 
   # Build and run frogbot current changes for visual sanity check.
   sanity-pull-request:
-    if: ${{ github.event_name != 'push' }}
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
