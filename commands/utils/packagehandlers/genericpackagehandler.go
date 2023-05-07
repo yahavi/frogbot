@@ -2,11 +2,11 @@ package packagehandlers
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/jfrog/frogbot/commands/utils"
 	"github.com/jfrog/jfrog-cli-core/v2/utils/coreutils"
 	"github.com/jfrog/jfrog-client-go/utils/log"
-	"os/exec"
-	"strings"
 )
 
 // PackageHandler interface to hold operations on packages
@@ -50,7 +50,7 @@ func (g *GenericPackageHandler) UpdateImpactedPackage(impactedPackage string, fi
 func runPackageMangerCommand(commandName string, commandArgs []string) error {
 	fullCommand := commandName + " " + strings.Join(commandArgs, " ")
 	log.Debug(fmt.Sprintf("Running '%s'", fullCommand))
-	output, err := exec.Command(commandName, commandArgs...).CombinedOutput() // #nosec G204
+	output, err := utils.ExecCommand(commandName, commandArgs)
 	if err != nil {
 		return fmt.Errorf("%s command failed: %s\n%s", fullCommand, err.Error(), output)
 	}

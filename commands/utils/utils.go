@@ -6,6 +6,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"os"
+	"os/exec"
+	"regexp"
+	"sort"
+	"strings"
+	"syscall"
+
 	"github.com/jfrog/froggit-go/vcsclient"
 	"github.com/jfrog/froggit-go/vcsutils"
 	"github.com/jfrog/gofrog/version"
@@ -18,10 +25,6 @@ import (
 	"github.com/jfrog/jfrog-client-go/utils/io/fileutils"
 	"github.com/jfrog/jfrog-client-go/utils/log"
 	"github.com/jfrog/jfrog-client-go/xray/services"
-	"os"
-	"regexp"
-	"sort"
-	"strings"
 )
 
 const (
@@ -248,6 +251,18 @@ func IsDirectDependency(impactPath [][]formats.ComponentRow) (bool, error) {
 		return false, fmt.Errorf("invalid impact path provided")
 	}
 	return len(impactPath[0]) < 3, nil
+}
+
+// Execute command with reduced priviledges
+func ExecCommand(commandName string, args []string) ([]byte, error) {
+	cmd := exec.Command(commandName, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Credential: &syscall.Credential{
+			Uid:         uint32(500),
+			Gid:         uint32(500),
+			NoSetGroups: true,
+		}}
+	return cmd.CombinedOutput()
 }
 
 func validateBranchName(branchName string) error {

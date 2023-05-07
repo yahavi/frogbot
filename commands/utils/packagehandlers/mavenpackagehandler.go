@@ -2,10 +2,10 @@ package packagehandlers
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/jfrog/frogbot/commands/utils"
 	"github.com/jfrog/jfrog-client-go/utils/log"
-	"os/exec"
-	"strings"
 )
 
 type MavenPackageHandler struct {
@@ -23,7 +23,7 @@ func (mvn *MavenPackageHandler) UpdateImpactedPackage(impactedPackage string, fi
 	updateVersionArgs := []string{"-B", "versions:use-dep-version", "-Dincludes=" + impactedPackage, "-DdepVersion=" + fixVersionInfo.FixVersion, "-DgenerateBackupPoms=false"}
 	updateVersionCmd := fmt.Sprintf("mvn %s", strings.Join(updateVersionArgs, " "))
 	log.Debug(fmt.Sprintf("Running '%s'", updateVersionCmd))
-	updateVersionOutput, err := exec.Command("mvn", updateVersionArgs...).CombinedOutput() // #nosec G204
+	updateVersionOutput, err := utils.ExecCommand("mvn", updateVersionArgs)
 	if err != nil {
 		return fmt.Errorf("mvn command failed: %s\n%s", err.Error(), updateVersionOutput)
 	}
@@ -33,7 +33,7 @@ func (mvn *MavenPackageHandler) UpdateImpactedPackage(impactedPackage string, fi
 		updatePropertyArgs := []string{"-B", "versions:set-property", "-Dproperty=" + property, "-DnewVersion=" + fixVersionInfo.FixVersion, "-DgenerateBackupPoms=false"}
 		updatePropertyCmd := fmt.Sprintf("mvn %s", strings.Join(updatePropertyArgs, " "))
 		log.Debug(fmt.Sprintf("Running '%s'", updatePropertyCmd))
-		updatePropertyOutput, err := exec.Command("mvn", updatePropertyArgs...).CombinedOutput() // #nosec G204
+		updatePropertyOutput, err := utils.ExecCommand("mvn", updatePropertyArgs)
 		if err != nil {
 			return fmt.Errorf("mvn command failed: %s\n%s", err.Error(), updatePropertyOutput)
 		}

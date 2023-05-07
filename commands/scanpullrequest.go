@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/jfrog/frogbot/commands/utils"
@@ -286,8 +285,7 @@ func runInstallIfNeeded(scanSetup *utils.ScanDetails, workDir string) (err error
 
 func runInstallCommand(scanSetup *utils.ScanDetails) ([]byte, error) {
 	if scanSetup.Repository == "" {
-		//#nosec G204 -- False positive - the subprocess only run after the user's approval.
-		return exec.Command(scanSetup.InstallCommandName, scanSetup.InstallCommandArgs...).CombinedOutput()
+		return utils.ExecCommand(scanSetup.InstallCommandName, scanSetup.InstallCommandArgs)
 	}
 
 	if _, exists := utils.MapTechToResolvingFunc[scanSetup.InstallCommandName]; !exists {
